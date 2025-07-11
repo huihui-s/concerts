@@ -5,52 +5,120 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的演唱會紀錄</title>
     <!-- 引入 Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
     <!-- 引入 Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Font Awesome for + icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         /* 自訂樣式 */
         body {
             font-family: 'Inter', sans-serif; /* 使用 Inter 字體 */
             background-color: #f0f2f5; /* 淺灰色背景 */
         }
-        .card {
-            border-radius: 1rem; /* 圓角卡片 */
-            overflow: hidden; /* 確保圖片圓角 */
+        
+        /* 票根樣式卡片 */
+        .ticket-card {
+            position: relative;
+            background-color: #fff;
+            border-radius: 0.5rem; /* 稍微圓角 */
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* 輕微陰影 */
+            overflow: hidden; /* 隱藏超出邊界的內容 */
+            display: flex; /* 使用 flexbox 佈局圖片和文字 */
+            margin-bottom: 1.5rem; /* 卡片間距 */
             transition: transform 0.2s ease-in-out; /* 懸停效果 */
+            border: 1px solid #e0e0e0; /* 輕微邊框 */
         }
-        .card:hover {
+
+        .ticket-card:hover {
             transform: translateY(-5px); /* 懸停時稍微上移 */
         }
-        .card-img-top {
+
+        /* 票根鋸齒邊緣效果 */
+        .ticket-card::before,
+        .ticket-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 10px; /* 鋸齒邊緣的寬度 */
+            background-image: radial-gradient(circle at 0 50%, #f0f2f5 5px, transparent 5px),
+                              radial-gradient(circle at 100% 50%, #f0f2f5 5px, transparent 5px);
+            background-size: 10px 20px; /* 鋸齒圓點的大小 */
+            background-repeat: repeat-y;
+            z-index: 1; /* 確保在卡片內容之上 */
+        }
+
+        .ticket-card::before {
+            left: -5px; /* 讓鋸齒稍微超出卡片邊界 */
+            background-position: 0 0; 
+        }
+
+        .ticket-card::after {
+            right: -5px; /* 讓鋸齒稍微超出卡片邊界 */
+            background-position: 100% 0; 
+        }
+
+        /* 內部內容區塊，確保內容不被鋸齒覆蓋 */
+        .ticket-card-inner {
+            flex-grow: 1;
+            display: flex;
+            padding: 0.5rem; /* 卡片內部填充 */
+            position: relative; /* 用於 z-index */
+            z-index: 2; /* 確保內容在鋸齒之上 */
+        }
+
+        .ticket-card-image-col {
+            flex-shrink: 0; /* 不壓縮圖片 */
+            width: 35%; /* 圖片佔比 */
+            padding-right: 0.5rem; /* 圖片與文字間距 */
+        }
+
+        .ticket-card-img {
             width: 100%;
-            height: 200px; /* 固定圖片高度 */
+            height: 100%; /* 填滿容器高度 */
             object-fit: cover; /* 保持圖片比例並裁切 */
-            border-top-left-radius: 1rem;
-            border-bottom-left-radius: 1rem;
+            border-radius: 0.3rem; /* 圖片圓角 */
         }
+
+        .ticket-card-body {
+            flex-grow: 1;
+            padding-left: 0.5rem; /* 文字與圖片間距 */
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* 垂直置中內容 */
+        }
+
+        /* RWD 調整 */
         @media (max-width: 767.98px) {
-            .card-img-top {
-                height: 150px; /* 手機版圖片高度 */
-                border-bottom-left-radius: 0;
-                border-top-right-radius: 1rem;
+            .ticket-card {
+                flex-direction: column; /* 手機版堆疊圖片和文字 */
             }
-            .card .row.g-0 {
-                flex-direction: column; /* 手機版堆疊 */
+            .ticket-card-image-col {
+                width: 100%; /* 手機版圖片全寬 */
+                height: 150px; /* 手機版圖片固定高度 */
+                padding-right: 0;
+                padding-bottom: 0.5rem; /* 圖片下方間距 */
+            }
+            .ticket-card-img {
+                border-radius: 0.5rem 0.5rem 0 0; /* 手機版圖片上方圓角 */
+            }
+            .ticket-card-body {
+                padding-left: 0;
+                padding-top: 0.5rem; /* 文字上方間距 */
+            }
+            /* 手機版鋸齒邊緣可以調整或簡化 */
+            .ticket-card::before,
+            .ticket-card::after {
+                /* 可以考慮在手機版上移除或調整鋸齒邊緣，例如只保留一側 */
+                /* 例如: display: none; */
             }
         }
+
         .pagination-container {
             display: flex;
             justify-content: center;
             padding: 1.5rem 0;
-        }
-        .form-section {
-            background-color: #ffffff;
-            padding: 2rem;
-            border-radius: 1rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            margin-bottom: 2rem;
         }
         .loading-overlay {
             position: fixed;
@@ -87,6 +155,73 @@
             border-radius: 5px;
             cursor: pointer;
         }
+
+        /* 浮動新增按鈕 (FAB) */
+        .fab-button {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: #007bff;
+            color: white;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            z-index: 1000;
+            transition: background-color 0.3s ease;
+        }
+        .fab-button:hover {
+            background-color: #0056b3;
+        }
+
+        /* 彈出式表單的背景遮罩 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        /* 彈出式表單的內容區塊 */
+        .modal-content {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 700px;
+            position: relative;
+            animation: fadeIn 0.3s ease-out;
+            max-height: 90vh; /* 限制高度 */
+            overflow-y: auto; /* 內容過多時可滾動 */
+        }
+
+        .modal-close-button {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -105,46 +240,59 @@
             載入中...
         </div>
 
-        <!-- 新增資料表單 -->
-        <div class="form-section mb-6 p-6 bg-white rounded-xl shadow-lg">
-            <h2 class="text-2xl font-semibold mb-4 text-gray-700">新增演唱會紀錄</h2>
-            <form @submit.prevent="addConcert">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="mb-3">
-                        <label for="concertName" class="form-label block text-gray-700 text-sm font-bold mb-2">演唱會名稱:</label>
-                        <input type="text" class="form-control w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:border-blue-500" id="concertName" v-model="newConcert.Concert" required>
+        <!-- 浮動新增按鈕 -->
+        <div class="fab-button" @click="showAddModal = true">
+            <i class="fas fa-plus"></i>
+        </div>
+
+        <!-- 彈出式新增資料表單 (Modal) -->
+        <div v-if="showAddModal" class="modal-overlay">
+            <div class="modal-content">
+                <button class="modal-close-button" @click="showAddModal = false">
+                    <i class="fas fa-times"></i>
+                </button>
+                <h2 class="text-2xl font-semibold mb-4 text-gray-700">新增演唱會紀錄</h2>
+                <form @submit.prevent="addConcert">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="mb-3">
+                            <label for="concertName" class="form-label block text-gray-700 text-sm font-bold mb-2">演唱會名稱:</label>
+                            <input type="text" class="form-control w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:border-blue-500" id="concertName" v-model="newConcert.Concert" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="artist" class="form-label block text-gray-700 text-sm font-bold mb-2">表演藝人:</label>
+                            <input type="text" class="form-control w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:border-blue-500" id="artist" v-model="newConcert.Artist" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="country" class="form-label block text-gray-700 text-sm font-bold mb-2">國家:</label>
+                            <input type="text" class="form-control w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:border-blue-500" id="country" v-model="newConcert.Country" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="location" class="form-label block text-gray-700 text-sm font-bold mb-2">場地:</label>
+                            <input type="text" class="form-control w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:border-blue-500" id="location" v-model="newConcert.Location" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="date" class="form-label block text-gray-700 text-sm font-bold mb-2">日期:</label>
+                            <input type="date" class="form-control w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:border-blue-500" id="date" v-model="newConcert.Date" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="price" class="form-label block text-gray-700 text-sm font-bold mb-2">票價:</label>
+                            <input type="text" class="form-control w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:border-blue-500" id="price" v-model="newConcert.Price">
+                        </div>
+                        <div class="mb-3">
+                            <label for="seat" class="form-label block text-gray-700 text-sm font-bold mb-2">座位:</label>
+                            <input type="text" class="form-control w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:border-blue-500" id="seat" v-model="newConcert.Seat">
+                        </div>
+                        <div class="mb-3">
+                            <label for="imgUrl" class="form-label block text-gray-700 text-sm font-bold mb-2">圖片網址:</label>
+                            <input type="url" class="form-control w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:border-blue-500" id="imgUrl" v-model="newConcert.ImgUrl" placeholder="可選填，或使用預設圖片">
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="artist" class="form-label block text-gray-700 text-sm font-bold mb-2">表演藝人:</label>
-                        <input type="text" class="form-control w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:border-blue-500" id="artist" v-model="newConcert.Artist" required>
+                    <div class="flex justify-end mt-4 space-x-3">
+                        <button type="button" class="btn btn-secondary py-2 px-4 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold rounded-lg transition duration-300" @click="showAddModal = false">取消</button>
+                        <button type="submit" class="btn btn-primary py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition duration-300">新增紀錄</button>
                     </div>
-                    <div class="mb-3">
-                        <label for="country" class="form-label block text-gray-700 text-sm font-bold mb-2">國家:</label>
-                        <input type="text" class="form-control w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:border-blue-500" id="country" v-model="newConcert.Country" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="location" class="form-label block text-gray-700 text-sm font-bold mb-2">場地:</label>
-                        <input type="text" class="form-control w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:border-blue-500" id="location" v-model="newConcert.Location" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="date" class="form-label block text-gray-700 text-sm font-bold mb-2">日期:</label>
-                        <input type="date" class="form-control w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:border-blue-500" id="date" v-model="newConcert.Date" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="price" class="form-label block text-gray-700 text-sm font-bold mb-2">票價:</label>
-                        <input type="text" class="form-control w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:border-blue-500" id="price" v-model="newConcert.Price">
-                    </div>
-                    <div class="mb-3">
-                        <label for="seat" class="form-label block text-gray-700 text-sm font-bold mb-2">座位:</label>
-                        <input type="text" class="form-control w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:border-blue-500" id="seat" v-model="newConcert.Seat">
-                    </div>
-                    <div class="mb-3">
-                        <label for="imgUrl" class="form-label block text-gray-700 text-sm font-bold mb-2">圖片網址:</label>
-                        <input type="url" class="form-control w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:border-blue-500" id="imgUrl" v-model="newConcert.ImgUrl" placeholder="可選填，或使用預設圖片">
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary w-full py-2 mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition duration-300">新增紀錄</button>
-            </form>
+                </form>
+            </div>
         </div>
 
         <!-- 排序和篩選 -->
@@ -169,12 +317,13 @@
         <!-- 演唱會卡片列表 -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div class="col" v-for="(item, index) in paginatedConcerts" :key="index">
-                <div class="card mb-3 flex flex-col md:flex-row">
-                    <div class="col-md-4">
-                        <img :src="item.ImgUrl || 'https://placehold.co/150x150/cccccc/000000?text=No+Image'" class="card-img-top" alt="演唱會圖片" @error="handleImageError">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body p-4">
+                <!-- 票根樣式卡片 -->
+                <div class="ticket-card">
+                    <div class="ticket-card-inner">
+                        <div class="ticket-card-image-col">
+                            <img :src="item.ImgUrl || 'https://placehold.co/150x150/cccccc/000000?text=No+Image'" class="ticket-card-img" alt="演唱會圖片" @error="handleImageError">
+                        </div>
+                        <div class="ticket-card-body">
                             <h5 class="card-title text-xl font-bold mb-2 text-gray-800">{{ item.Concert }}</h5>
                             <p class="card-text text-gray-700 mb-1"><strong>藝人:</strong> {{ item.Artist }}</p>
                             <p class="card-text text-gray-700 mb-1"><strong>地點:</strong> {{ item.Country }} | {{ item.Location }}</p>
@@ -209,19 +358,21 @@
 
     <!-- 引入 Vue.js CDN -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- 引入 Axios CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <!-- 引入 Bootstrap 5 JS (可選，但為了某些組件可能需要) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 
     <script>
         const app = Vue.createApp({
             data() {
                 return {
-                    // !!! 請將此處替換為您部署 Google Apps Script 後取得的實際網路應用程式 URL !!!
-                    // 例如: 'https://script.google.com/macros/s/AKfycbz.../exec'
+                    // 請將此處替換為您部署 Google Apps Script 後取得的實際網路應用程式 URL
+                    // 範例: 'https://script.google.com/macros/s/AKfycbzDhpebTPXrMG_YvUGlUZbv6IWAIAWtlH1gLCXJfW0hTXqjWwsBwkC0D4BWcLlygKu61A/exec'
                     googleAppsScriptUrl: 'https://script.google.com/macros/s/AKfycbzDhpebTPXrMG_YvUGlUZbv6IWAIAWtlH1gLCXJfW0hTXqjWwsBwkC0D4BWcLlygKu61A/exec', 
                     
-                    concerts: [], // 儲存所有演唱會資料
-                    newConcert: { // 用於新增表單的資料物件
+                    concerts: [], 
+                    newConcert: { 
                         Concert: '',
                         Artist: '',
                         Country: '',
@@ -231,42 +382,48 @@
                         Seat: '',
                         ImgUrl: ''
                     },
-                    isLoading: false, // 載入狀態
-                    messageBox: { // 訊息框狀態
+                    isLoading: false, 
+                    messageBox: { 
                         visible: false,
                         text: ''
                     },
-                    currentPage: 1, // 當前頁碼
-                    itemsPerPage: 10, // 每頁顯示數量
-                    sortKey: 'Date_desc', // 預設排序方式：日期新到舊
-                    searchTerm: '' // 搜尋關鍵字
+                    currentPage: 1, 
+                    itemsPerPage: 10, 
+                    sortKey: 'Date_desc', 
+                    searchTerm: '',
+                    showAddModal: false // 控制新增表單彈出視窗的顯示/隱藏
                 };
             },
             computed: {
-                // 根據搜尋關鍵字過濾演唱會資料
                 filteredConcerts() {
+                    if (!Array.isArray(this.concerts)) {
+                        console.warn('filteredConcerts: this.concerts 不是陣列，返回空陣列。', this.concerts);
+                        return [];
+                    }
                     if (!this.searchTerm) {
                         return this.concerts;
                     }
                     const lowerCaseSearchTerm = this.searchTerm.toLowerCase();
                     return this.concerts.filter(concert =>
-                        (concert.Concert && concert.Concert.toLowerCase().includes(lowerCaseSearchTerm)) ||
-                        (concert.Artist && concert.Artist.toLowerCase().includes(lowerCaseSearchTerm))
+                        (concert.Concert && String(concert.Concert).toLowerCase().includes(lowerCaseSearchTerm)) ||
+                        (concert.Artist && String(concert.Artist).toLowerCase().includes(lowerCaseSearchTerm))
                     );
                 },
-                // 根據排序方式排序過濾後的演唱會資料
                 sortedConcerts() {
-                    const sorted = [...this.filteredConcerts]; // 複製一份以避免修改原始資料
+                    if (!Array.isArray(this.filteredConcerts)) {
+                        console.error('sortedConcerts: this.filteredConcerts 不是陣列！無法排序。類型:', typeof this.filteredConcerts, '值:', this.filteredConcerts);
+                        return []; 
+                    }
+                    const sorted = [...this.filteredConcerts]; 
                     const [key, order] = this.sortKey.split('_');
 
                     sorted.sort((a, b) => {
                         let valA = a[key];
                         let valB = b[key];
 
-                        // 對日期進行特殊處理
                         if (key === 'Date') {
-                            valA = new Date(valA);
-                            valB = new Date(valB);
+                            valA = valA ? new Date(valA) : new Date(0); 
+                            valB = valB ? new Date(valB) : new Date(0);
                         } else if (typeof valA === 'string') {
                             valA = valA.toLowerCase();
                             valB = valB.toLowerCase();
@@ -278,11 +435,9 @@
                     });
                     return sorted;
                 },
-                // 計算總頁數
                 totalPages() {
                     return Math.ceil(this.sortedConcerts.length / this.itemsPerPage);
                 },
-                // 取得當前頁的演唱會資料
                 paginatedConcerts() {
                     const start = (this.currentPage - 1) * this.itemsPerPage;
                     const end = start + this.itemsPerPage;
@@ -313,30 +468,54 @@
                     event.target.src = 'https://placehold.co/150x150/cccccc/000000?text=No+Image';
                 },
                 /**
-                 * 從 Google Sheet API 載入演唱會資料
+                 * 從 Google Sheet API 載入演唱會資料 (使用 Axios)
                  */
                 async fetchConcerts() {
-                    this.isLoading = true; // 顯示載入中
+                    this.isLoading = true; 
+                    console.log('嘗試從 Google Apps Script URL 載入資料 (使用 Axios):', this.googleAppsScriptUrl);
                     try {
-                        const response = await fetch(this.googleAppsScriptUrl);
-                        if (!response.ok) {
-                            throw new Error(`HTTP 錯誤! 狀態: ${response.status}`);
+                        const response = await axios.get(this.googleAppsScriptUrl);
+                        console.log('Axios GET response received:', response);
+                        console.log('Response status:', response.status);
+                        console.log('Response data:', response.data); 
+
+                        const data = response.data; 
+
+                        if (Array.isArray(data)) {
+                            console.log('成功解析 JSON 資料，且為陣列:', data);
+                            this.concerts = data;
+                        } else {
+                            console.warn('從 API 獲取的資料不是陣列，將設定為空陣列:', data);
+                            this.concerts = []; 
+                            this.showMessageBox('警告: 從伺服器獲取的資料格式不正確，已重設列表。');
                         }
-                        const data = await response.json();
-                        this.concerts = data;
-                        this.sortConcerts(); // 載入後立即排序
+                        this.sortConcerts(); 
                     } catch (error) {
                         console.error('載入演唱會資料失敗:', error);
-                        this.showMessageBox(`載入演唱會資料失敗: ${error.message}`);
+                        this.concerts = []; 
+
+                        let errorMessage = '載入演唱會資料失敗: ';
+                        if (error.response) {
+                            errorMessage += `伺服器錯誤 - 狀態碼: ${error.response.status}. 回應: ${JSON.stringify(error.response.data || error.response.statusText).substring(0, 200)}...`;
+                            console.error('Axios 錯誤回應:', error.response);
+                        } else if (error.request) {
+                            errorMessage += '沒有收到伺服器回應。可能是網路問題或 CORS。';
+                            console.error('Axios 請求錯誤:', error.request);
+                        } else {
+                            errorMessage += `請求設置錯誤: ${error.message}`;
+                            console.error('Axios 錯誤:', error.message);
+                        }
+                        this.showMessageBox(errorMessage);
                     } finally {
-                        this.isLoading = false; // 隱藏載入中
+                        this.isLoading = false; 
+                        console.log('載入完成，isLoading 設為 false。');
                     }
                 },
                 /**
-                 * 新增演唱會資料到 Google Sheet
+                 * 新增演唱會資料到 Google Sheet (使用 Axios)
                  */
                 async addConcert() {
-                    this.isLoading = true; // 顯示載入中
+                    this.isLoading = true; 
                     try {
                         // 檢查日期格式是否正確
                         if (!this.newConcert.Date || isNaN(new Date(this.newConcert.Date))) {
@@ -345,19 +524,17 @@
                             return;
                         }
 
-                        const response = await fetch(this.googleAppsScriptUrl, {
-                            method: 'POST',
+                        console.log('嘗試新增資料 (使用 Axios):', JSON.stringify(this.newConcert)); // 打印完整的 JSON 字串
+                        // 使用 Axios 發送 POST 請求
+                        const response = await axios.post(this.googleAppsScriptUrl, this.newConcert, {
                             headers: {
                                 'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify(this.newConcert)
+                            }
                         });
+                        console.log('Axios POST response received:', response);
 
-                        if (!response.ok) {
-                            throw new Error(`HTTP 錯誤! 狀態: ${response.status}`);
-                        }
-
-                        const result = await response.json();
+                        const result = response.data; 
+                        console.log('新增資料結果:', result);
                         if (result.status === 'success') {
                             this.showMessageBox('演唱會紀錄新增成功！');
                             // 清空表單
@@ -371,15 +548,27 @@
                                 Seat: '',
                                 ImgUrl: ''
                             };
+                            this.showAddModal = false; // 成功後關閉彈出視窗
                             await this.fetchConcerts(); // 重新載入資料以更新列表
                         } else {
                             this.showMessageBox(`新增失敗: ${result.message || '未知錯誤'}`);
                         }
                     } catch (error) {
                         console.error('新增演唱會資料失敗:', error);
-                        this.showMessageBox(`新增演唱會資料失敗: ${error.message}`);
+                        let errorMessage = '新增演唱會資料失敗: ';
+                        if (error.response) {
+                            errorMessage += `伺服器錯誤 - 狀態碼: ${error.response.status}. 回應: ${JSON.stringify(error.response.data || error.response.statusText).substring(0, 200)}...`;
+                            console.error('Axios 錯誤回應:', error.response);
+                        } else if (error.request) {
+                            errorMessage += '沒有收到伺服器回應。可能是網路問題或 CORS。';
+                            console.error('Axios 請求錯誤:', error.request);
+                        } else {
+                            errorMessage += `請求設置錯誤: ${error.message}`;
+                            console.error('Axios 錯誤:', error.message);
+                        }
+                        this.showMessageBox(errorMessage);
                     } finally {
-                        this.isLoading = false; // 隱藏載入中
+                        this.isLoading = false; 
                     }
                 },
                 /**
@@ -391,7 +580,6 @@
                     const concertDate = new Date(concertDateString);
                     const now = new Date();
                     
-                    // 檢查日期是否有效
                     if (isNaN(concertDate.getTime())) {
                         return '日期無效';
                     }
@@ -423,7 +611,7 @@
                 formatDate(dateString) {
                     const date = new Date(dateString);
                     if (isNaN(date.getTime())) {
-                        return dateString; // 如果日期無效，返回原始字串
+                        return dateString; 
                     }
                     return date.toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric' });
                 },
@@ -431,15 +619,13 @@
                  * 根據選擇的排序方式重新排序演唱會資料
                  */
                 sortConcerts() {
-                    // computed 屬性 sortedConcerts 會自動重新計算
-                    this.currentPage = 1; // 排序後回到第一頁
+                    this.currentPage = 1; 
                 },
                 /**
                  * 根據搜尋關鍵字過濾演唱會資料
                  */
                 filterConcerts() {
-                    // computed 屬性 filteredConcerts 會自動重新計算
-                    this.currentPage = 1; // 篩選後回到第一頁
+                    this.currentPage = 1; 
                 },
                 /**
                  * 改變當前顯示的頁碼
@@ -452,7 +638,6 @@
                 }
             },
             mounted() {
-                // 當 Vue 應用程式掛載後，立即載入演唱會資料
                 this.fetchConcerts();
             }
         });
