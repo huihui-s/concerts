@@ -278,7 +278,7 @@
 
     <script>
         // 將此替換為您部署的 Google Apps Script Web 應用程式 URL
-        const SCRIPT_URL = 'https://script.google.com/macros/library/d/1RCmwJCnOAf26EME1d-mhpvQc_wQJkATdgPu6GBD5-TK7ae8OxZRhZD1W/3';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxAy0SBDS8oeFMRD5tFRQyLJMQweUFyGAoEjjYlmbGKbEVCHHGukMNznELGDUQPe-xZsQ/exec';
         const concertsContainer = document.getElementById('concertsContainer');
         const formMessage = document.getElementById('formMessage');
         const loadingMessage = document.getElementById('loadingMessage');
@@ -304,6 +304,8 @@
                     <p><strong>藝人:</strong> ${record['Artist'] || 'N/A'}</p>
                     <p><strong>日期:</strong> ${record['Date'] ? new Date(record['Date']).toLocaleDateString() : 'N/A' }</p>
                     <p><strong>地點:</strong> ${record['Location'] || 'N/A'}</p>
+                    <p><strong>座位:</strong> ${record['Seat'] || 'N/A'}</p>
+                    <p><strong>票價:</strong> ${record['Price'] || 'N/A'}</p>
                     <p>${record['Notes'] || ''}</p>
                 </div>
                 <div class="ticket-style"></div>
