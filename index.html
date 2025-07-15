@@ -91,8 +91,11 @@
             margin-top: 15px;
             text-align: center;
             font-weight: bold;
-            color: #d35400;
         }
+        .message-area.success { color: #27ae60; }
+        .message-area.error { color: #c0392b; }
+        .message-area.info { color: #d35400; }
+
 
         /* 演唱會卡片區塊 */
         .concert-grid {
@@ -165,7 +168,7 @@
             width: 100%;
             height: 10px; /* 票根效果的高度 */
             background-image:
-                /* 上層半圓，向下凹陷 */
+                /* 下半圓，向下凹陷 */
                 radial-gradient(circle at 5px -5px, transparent 10px, #ffffff 10px),
                 radial-gradient(circle at 5px 15px, #ffffff 10px, transparent 10px);
             background-size: 10px 20px; /* 每個半圓的寬高 */
@@ -179,7 +182,7 @@
             top: 0;
             right: 0;
             width: 10px; /* 票根效果的寬度 */
-            height: 100%;
+            height: calc(100% - 10px); /* 考慮底部票根的高度 */
             background-image:
                 /* 右側半圓，向左凹陷 */
                 radial-gradient(circle at -5px 5px, transparent 10px, #ffffff 10px),
@@ -195,7 +198,7 @@
             top: 0;
             left: 0;
             width: 10px; /* 票根效果的寬度 */
-            height: 100%;
+            height: calc(100% - 10px); /* 考慮底部票根的高度 */
             background-image:
                 /* 左側半圓，向右凹陷 */
                 radial-gradient(circle at 15px 5px, transparent 10px, #ffffff 10px),
@@ -243,70 +246,108 @@
             <h2>新增演唱會紀錄</h2>
             <form id="concertForm">
                 <label for="concertName">演唱會名稱:</label>
-                <input type="text" id="concertName" name="concertName" required>
+                <input type="text" id="concertName" name="Concert Name" required>
 
                 <label for="artist">藝人/樂團:</label>
-                <input type="text" id="artist" name="artist" required>
+                <input type="text" id="artist" name="Artist" required>
 
                 <label for="date">日期:</label>
-                <input type="date" id="date" name="date" required>
+                <input type="date" id="date" name="Date" required>
 
                 <label for="location">地點:</label>
-                <input type="text" id="location" name="location" required>
+                <input type="text" id="location" name="Location" required>
 
                 <label for="imageUrl">圖片網址 (可選):</label>
-                <input type="text" id="imageUrl" name="imageUrl">
+                <input type="text" id="imageUrl" name="Image URL">
 
                 <label for="notes">備註 (可選):</label>
-                <textarea id="notes" name="notes"></textarea>
+                <textarea id="notes" name="Notes"></textarea>
 
                 <button type="submit">新增紀錄</button>
                 <p class="message-area" id="formMessage"></p>
             </form>
         </section>
 
-        <section class="concert-grid" id="concertsContainer">
-            <h2>我的演唱會列表</h2>
-            <div class="concert-card">
-                <div class="concert-card-image">
-                    <img src="https://via.placeholder.com/200x150?text=Concert+Image" alt="演唱會圖片">
+        <section>
+            <h2>所有演唱會</h2>
+            <div class="concert-grid" id="concertsContainer">
+                <p id="loadingMessage" class="message-area info">載入中...</p>
                 </div>
-                <div class="concert-card-content">
-                    <h3>範例演唱會名稱</h3>
-                    <p><strong>藝人:</strong> 範例藝人</p>
-                    <p><strong>日期:</strong> 2024-07-15</p>
-                    <p><strong>地點:</strong> 範例場館</p>
-                    <p>這是一個範例演唱會紀錄的內容。</p>
-                </div>
-                <div class="ticket-style"></div>
-            </div>
-
-             <div class="concert-card">
-                <div class="concert-card-image">
-                    <img src="https://via.placeholder.com/200x150?text=Another+Concert" alt="演唱會圖片">
-                </div>
-                <div class="concert-card-content">
-                    <h3>另一場演唱會</h3>
-                    <p><strong>藝人:</strong> 測試樂團</p>
-                    <p><strong>日期:</strong> 2024-08-01</p>
-                    <p><strong>地點:</strong> 某個地方</p>
-                    <p>這是一個另一個範例演唱會紀錄的內容。</p>
-                </div>
-                <div class="ticket-style"></div>
-            </div>
         </section>
     </div>
 
     <script>
         // 將此替換為您部署的 Google Apps Script Web 應用程式 URL
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxAy0SBDS8oeFMRD5tFRQyLJMQweUFyGAoEjjYlmbGKbEVCHHGukMNznELGDUQPe-xZsQ/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/library/d/1RCmwJCnOAf26EME1d-mhpvQc_wQJkATdgPu6GBD5-TK7ae8OxZRhZD1W/3';
+        const concertsContainer = document.getElementById('concertsContainer');
+        const formMessage = document.getElementById('formMessage');
+        const loadingMessage = document.getElementById('loadingMessage');
 
+        // 輔助函式：顯示訊息
+        function showMessage(element, message, type) {
+            element.textContent = message;
+            element.className = `message-area ${type}`;
+        }
+
+        // 輔助函式：創建演唱會卡片 HTML
+        function createConcertCard(record) {
+            const card = document.createElement('div');
+            card.className = 'concert-card';
+            const defaultImageUrl = 'https://via.placeholder.com/200x150?text=No+Image'; // 預設圖片
+
+            card.innerHTML = `
+                <div class="concert-card-image">
+                    <img src="${record ['Image URL'] || defaultImageUrl}" alt="${record['Concert Name'] || '演唱會圖片'}">
+                </div>
+                <div class="concert-card-content">
+                    <h3>${record['Concert Name'] || '未命名演唱會'}</h3>
+                    <p><strong>藝人:</strong> ${record['Artist'] || 'N/A'}</p>
+                    <p><strong>日期:</strong> ${record['Date'] ? new Date(record['Date']).toLocaleDateString() : 'N/A' }</p>
+                    <p><strong>地點:</strong> ${record['Location'] || 'N/A'}</p>
+                    <p>${record['Notes'] || ''}</p>
+                </div>
+                <div class="ticket-style"></div>
+            `;
+            return card;
+        }
+
+        // 載入演唱會資料並渲染到頁面
+        async function loadConcerts() {
+            concertsContainer.innerHTML = ''; // 清空現有卡片
+            showMessage(loadingMessage, '載入中...', 'info');
+
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+
+                const result = await response.json();
+
+                if (result.result === 'success') {
+                    if (result.data && result.data.length > 0) {
+                        result.data.forEach(record => {
+                            const card = createConcertCard(record);
+                            concertsContainer.appendChild(card);
+                        });
+                        loadingMessage.style.display = 'none'; // 隱藏載入訊息
+                    } else {
+                        showMessage(loadingMessage, '目前沒有演唱會紀錄，請新增！', 'info');
+                    }
+                } else {
+                    showMessage(loadingMessage, '載入失敗: ' + result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error loading concerts:', error);
+                showMessage(loadingMessage, '載入演唱會時發生錯誤。請檢查網路或稍後再試。', 'error');
+            }
+        }
+
+        // 表單提交處理
         document.getElementById('concertForm').addEventListener('submit', async function(event) {
             event.preventDefault(); // 阻止表單預設提交行為
 
-            const formMessage = document.getElementById('formMessage');
-            formMessage.textContent = '正在提交...';
-            formMessage.style.color = '#d35400';
+            showMessage(formMessage, '正在提交...', 'info');
 
             const formData = {
                 concertName: document.getElementById('concertName').value,
@@ -320,7 +361,7 @@
             try {
                 const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'cors', // 必須開啟 CORS
+                    mode: 'cors',
                     headers: {
                         'Content-Type': 'application/json'
                     },
@@ -330,34 +371,19 @@
                 const result = await response.json();
 
                 if (result.result === 'success') {
-                    formMessage.textContent = '紀錄新增成功！';
-                    formMessage.style.color = '#27ae60';
+                    showMessage(formMessage, '紀錄新增成功！', 'success');
                     document.getElementById('concertForm').reset(); // 清空表單
-                    // 在此處可以考慮動態將新紀錄添加到頁面上，或提示用戶刷新頁面
+                    await loadConcerts(); // 重新載入並顯示最新資料
                 } else {
-                    formMessage.textContent = '新增失敗: ' + result.message;
-                    formMessage.style.color = '#c0392b';
+                    showMessage(formMessage, '新增失敗: ' + result.message, 'error');
                 }
             } catch (error) {
-                console.error('Error:', error);
-                formMessage.textContent = '提交時發生錯誤。請檢查網路或稍後再試。';
-                formMessage.style.color = '#c0392b';
+                console.error('Error submitting form:', error);
+                showMessage(formMessage, '提交時發生錯誤。請檢查網路或稍後再試。', 'error');
             }
         });
 
-        // 可以在這裡添加一個函數，用於從 Google Sheet 讀取資料並顯示在頁面上
-        // 這需要 Apps Script 的 doGet 函數也能回傳資料，並且需要處理更多的 CORS 設定
-        // 為了簡化，目前只實現了資料寫入
-        async function loadConcerts() {
-            // 由於 Apps Script 部署為 Web App 時，doGet 預設是回傳 HTML 頁面
-            // 如果要讀取資料，Apps Script 需要另一個 doGet 函數返回 JSON
-            // 且部署為 "Execute as: Me" 和 "Who has access: Anyone" 並進行授權
-            // 為了簡化，此處暫不實作從 Apps Script 讀取資料的功能
-            // 您可以手動在 index.html 中添加一些範例卡片。
-            console.log("此範例主要展示數據寫入功能。如需讀取，Apps Script 端需額外開發。");
-        }
-
-        // 頁面載入時載入現有紀錄 (目前為佔位符)
+        // 頁面載入時自動載入現有紀錄
         document.addEventListener('DOMContentLoaded', loadConcerts);
     </script>
 </body>
