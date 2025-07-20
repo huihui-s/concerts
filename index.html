@@ -4,389 +4,485 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的演唱會紀錄</title>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
     <style>
+        /* 全局樣式 */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f2f5;
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 40px;
+            font-family: 'Avenir', Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
             color: #2c3e50;
+            background-color: #f8f9fa; /* 輕微背景色 */
         }
 
-        h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+        #app {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 0 10px;
+            max-width: 960px; /* 限制內容最大寬度 */
         }
 
-        /* 新增紀錄表單 */
-        .record-form {
-            background-color: #ffffff;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            margin-bottom: 40px;
-        }
-
-        .record-form h2 {
-            text-align: center;
-            color: #34495e;
-            margin-bottom: 25px;
-            font-size: 1.8em;
-        }
-
-        .record-form label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #555;
-        }
-
-        .record-form input[type="text"],
-        .record-form input[type="date"],
-        .record-form textarea {
-            width: calc(100% - 20px);
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 1em;
-            box-sizing: border-box; /* 確保 padding 不增加寬度 */
-        }
-
-        .record-form textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        .record-form button {
-            display: block;
-            width: 100%;
-            padding: 12px 20px;
-            background-color: #4CAF50;
-            color: white;
+        /* 卡片樣式 */
+        .card {
             border: none;
-            border-radius: 5px;
-            font-size: 1.1em;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 15px; /* 圓角 */
+            overflow: hidden; /* 確保票根效果不超出邊界 */
+            transition: transform 0.2s ease-in-out; /* 添加懸停效果 */
         }
 
-        .record-form button:hover {
-            background-color: #45a049;
+        .card:hover {
+            transform: translateY(-5px); /* 懸停時輕微上移 */
         }
 
-        .message-area {
-            margin-top: 15px;
-            text-align: center;
-            font-weight: bold;
-        }
-        .message-area.success { color: #27ae60; }
-        .message-area.error { color: #c0392b; }
-        .message-area.info { color: #d35400; }
-
-
-        /* 演唱會卡片區塊 */
-        .concert-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px; /* 卡片間距 */
-            justify-content: center; /* 水平居中 */
-        }
-
-        .concert-card {
-            background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            display: flex; /* 使用 Flexbox 進行圖片和文字排版 */
-            width: 100%; /* 確保在任何螢幕尺寸下都單列顯示 */
-            max-width: 600px; /* 設定最大寬度以避免在超寬螢幕上過大 */
-            min-height: 180px; /* 設定最小高度確保卡片高度一致 */
-            height: auto; /* 讓高度根據內容調整，但結合 min-height 確保一致性 */
-            box-sizing: border-box;
-            position: relative; /* 用於票根效果定位 */
-            padding-bottom: 10px; /* 為票根效果預留空間 */
-        }
-
-        .concert-card-image {
-            flex: 0 0 40%; /* 圖片佔卡片寬度的40% */
-            overflow: hidden;
-            border-top-left-radius: 12px;
-            border-bottom-left-radius: 12px;
-        }
-
-        .concert-card-image img {
+        /* 確保圖片與文字的比例 */
+        .concert-img {
             width: 100%;
-            height: 100%;
-            object-fit: cover; /* 圖片適應性縮放，填充容器並裁切 */
-            display: block;
+            height: 100%; /* 讓圖片高度與卡片內容一致 */
+            object-fit: cover; /* 保持圖片比例並填充 */
+            display: block; /* 移除圖片底部多餘空間 */
         }
 
-        .concert-card-content {
-            flex: 1; /* 文字內容佔剩餘空間，即60% */
-            padding: 15px 20px;
+        .card .row.g-0 > .col-md-4 {
+            flex: 0 0 auto; /* 防止圖片列自動縮小 */
+            width: 40%;
+        }
+
+        .card .row.g-0 > .col-md-8 {
+            flex: 0 0 auto;
+            width: 60%;
+        }
+
+        @media (max-width: 767.98px) {
+            .card .row.g-0 > .col-md-4,
+            .card .row.g-0 > .col-md-8 {
+                width: 100%; /* 小螢幕下單列顯示 */
+            }
+            .card .row.g-0 > .col-md-4 {
+                height: 200px; /* 小螢幕下圖片固定高度 */
+            }
+        }
+
+        /* 卡片文字樣式 */
+        .card-title {
+            font-size: 1.5rem; /* 演唱會名稱更大 */
+            font-weight: bold; /* 粗體 */
+            color: #34495e; /* 更深的顏色 */
+            margin-bottom: 0.5rem;
+        }
+
+        .card-text {
+            font-size: 0.95rem;
+            color: #555;
+            margin-bottom: 0.25rem;
+        }
+
+        .card-text strong {
+            color: #333;
+        }
+
+        .card-body {
+            padding: 1rem 1.25rem; /* 調整內邊距 */
             display: flex;
             flex-direction: column;
-            justify-content: center; /* 垂直居中內容 */
-        }
-
-        .concert-card h3 {
-            font-size: 1.5em; /* 演唱會名稱更大 */
-            font-weight: bold; /* 粗體 */
-            margin-top: 0;
-            margin-bottom: 5px;
-            color: #2c3e50;
-        }
-
-        .concert-card p {
-            font-size: 0.95em;
-            margin-bottom: 5px;
-            color: #555;
-        }
-
-        .concert-card p strong {
-            color: #34495e;
+            justify-content: center;
+            height: 100%; /* 確保內容垂直居中 */
         }
 
         /* 票根效果 */
         .ticket-style {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 10px; /* 票根效果的高度 */
-            background-image:
-                /* 下半圓，向下凹陷 */
-                radial-gradient(circle at 5px -5px, transparent 10px, #ffffff 10px),
-                radial-gradient(circle at 5px 15px, #ffffff 10px, transparent 10px);
-            background-size: 10px 20px; /* 每個半圓的寬高 */
-            background-repeat: repeat-x; /* 水平重複 */
-            background-position: 0 0; /* 起始位置 */
+            position: relative;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
         }
-        /* 右側票根效果 */
-        .ticket-style::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 10px; /* 票根效果的寬度 */
-            height: calc(100% - 10px); /* 考慮底部票根的高度 */
-            background-image:
-                /* 右側半圓，向左凹陷 */
-                radial-gradient(circle at -5px 5px, transparent 10px, #ffffff 10px),
-                radial-gradient(circle at 15px 5px, #ffffff 10px, transparent 10px);
-            background-size: 20px 10px; /* 每個半圓的寬高 */
-            background-repeat: repeat-y; /* 垂直重複 */
-            background-position: 0 0; /* 起始位置 */
-        }
-        /* 左側票根效果 */
+
+        .ticket-style::before,
         .ticket-style::after {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 10px; /* 票根效果的寬度 */
-            height: calc(100% - 10px); /* 考慮底部票根的高度 */
-            background-image:
-                /* 左側半圓，向右凹陷 */
-                radial-gradient(circle at 15px 5px, transparent 10px, #ffffff 10px),
-                radial-gradient(circle at -5px 5px, #ffffff 10px, transparent 10px);
-            background-size: 20px 10px; /* 每個半圓的寬高 */
-            background-repeat: repeat-y; /* 垂直重複 */
-            background-position: 0 0; /* 起始位置 */
+            left: 40%; /* 根據圖片寬度40%調整 */
+            width: 20px; /* 半圓形半徑的兩倍 */
+            height: 20px; /* 半圓形半徑的兩倍 */
+            background-color: #fff; /* 與卡片背景色一致 */
+            border: 1px solid #ddd;
+            z-index: 1; /* 確保在卡片內容之上 */
         }
 
+        .ticket-style::before {
+            top: -10px; /* 向上延伸，一半在外面 */
+            border-radius: 0 0 50% 50%; /* 底部為半圓形 */
+            border-top: none;
+            transform: translateX(-50%); /* 水平居中 */
+        }
 
-        /* 媒體查詢：針對小螢幕調整 */
-        @media (max-width: 768px) {
-            .concert-card {
-                flex-direction: column; /* 小螢幕下圖片和文字垂直堆疊 */
-            }
+        .ticket-style::after {
+            bottom: -10px; /* 向下延伸 */
+            border-radius: 50% 50% 0 0; /* 頂部為半圓形 */
+            border-bottom: none;
+            transform: translateX(-50%); /* 水平居中 */
+        }
 
-            .concert-card-image {
-                flex: none; /* 取消 flex 屬性 */
-                width: 100%; /* 圖片佔滿寬度 */
-                height: 200px; /* 設定一個固定高度或根據需求調整 */
-                border-bottom-left-radius: 0;
-                border-top-right-radius: 12px; /* 調整圓角 */
-            }
+        /* 添加票根虛線效果 */
+        .ticket-style .col-md-4 {
+            position: relative;
+        }
 
-            .concert-card-image img {
-                height: 100%; /* 確保圖片填充高度 */
-            }
-
-            .concert-card-content {
-                flex: none;
+        .ticket-style .col-md-4::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -1px; /* 放在圖片列的右邊界 */
+            height: 100%;
+            width: 2px; /* 虛線寬度 */
+            background-image: linear-gradient(to bottom, #ccc 50%, transparent 50%);
+            background-size: 2px 10px; /* 虛線點大小 */
+            background-repeat: repeat-y;
+            z-index: 2; /* 確保在圖片和文字之間 */
+        }
+        @media (max-width: 767.98px) {
+            .ticket-style .col-md-4::after {
+                right: unset;
+                bottom: -1px; /* 小螢幕下虛線在圖片下方 */
+                left: 0;
                 width: 100%;
-                padding-top: 10px; /* 調整內邊距 */
-                border-top-left-radius: 0; /* 調整圓角 */
+                height: 2px;
+                background-image: linear-gradient(to right, #ccc 50%, transparent 50%);
+                background-size: 10px 2px;
+                background-repeat: repeat-x;
             }
+        }
+
+        /* 圓形 + 按鈕 */
+        .add-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            z-index: 1000;
+        }
+
+        .add-button:hover {
+            background-color: #0056b3;
+            transform: scale(1.1);
+        }
+
+        /* Modal 樣式覆蓋 */
+        .modal {
+            background-color: rgba(0, 0, 0, 0.5); /* 半透明背景 */
+        }
+        .modal-dialog {
+            margin-top: 50px; /* 讓 modal 離頂部有一些距離 */
+        }
+
+        /* 分頁樣式 */
+        .pagination .page-item.active .page-link {
+            background-color: #007bff;
+            border-color: #007bff;
+            color: white;
+        }
+        .pagination .page-link {
+            color: #007bff;
+        }
+        .pagination .page-item.disabled .page-link {
+            color: #6c757d;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>我的演唱會紀錄</h1>
-    </header>
+    <div id="app" class="container py-4">
+        <h1 class="text-center mb-5">我的演唱會紀錄</h1>
 
-    <div class="container">
-        <section class="record-form">
-            <h2>新增演唱會紀錄</h2>
-            <form id="concertForm">
-                <label for="concertName">演唱會名稱:</label>
-                <input type="text" id="concertName" name="Concert Name" required>
+        <div class="d-flex flex-wrap justify-content-center align-items-center mb-4">
+            <div class="me-3 mb-2">
+                <label for="sort-by" class="form-label mb-0">排序方式:</label>
+                <select id="sort-by" class="form-select" v-model="sortBy" @change="sortConcerts">
+                    <option value="Date">日期</option>
+                    <option value="ConcertName">演唱會名稱</option>
+                    <option value="Artist">表演藝人</option>
+                    <option value="Location">場地</option>
+                </select>
+            </div>
+            <div class="mb-2">
+                <label for="sort-order" class="form-label mb-0">排序順序:</label>
+                <select id="sort-order" class="form-select" v-model="sortOrder" @change="sortConcerts">
+                    <option value="asc">正序</option>
+                    <option value="desc">倒序</option>
+                </select>
+            </div>
+        </div>
 
-                <label for="artist">藝人/樂團:</label>
-                <input type="text" id="artist" name="Artist" required>
-
-                <label for="date">日期:</label>
-                <input type="date" id="date" name="Date" required>
-
-                <label for="location">地點:</label>
-                <input type="text" id="location" name="Location" required>
-
-                <label for="imageUrl">圖片網址 (可選):</label>
-                <input type="text" id="imageUrl" name="Image URL">
-
-                <label for="notes">備註 (可選):</label>
-                <textarea id="notes" name="Notes"></textarea>
-
-                <button type="submit">新增紀錄</button>
-                <p class="message-area" id="formMessage"></p>
-            </form>
-        </section>
-
-        <section>
-            <h2>所有演唱會</h2>
-            <div class="concert-grid" id="concertsContainer">
-                <p id="loadingMessage" class="message-area info">載入中...</p>
+        <div class="row row-cols-1 g-4 mb-5">
+            <div class="col" v-for="item in paginatedConcerts" :key="item.ConcertName + item.Date">
+                <div class="card ticket-style mb-3">
+                    <div class="row g-0 align-items-center">
+                        <div class="col-md-4">
+                            <img :src="item.ImgUrl || 'https://via.placeholder.com/200x150?text=No+Image'" class="card-img-top concert-img" :alt="item.ConcertName">
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ item.ConcertName }}</h5>
+                                <p class="card-text"><strong>藝人:</strong> {{ item.Artist }}</p>
+                                <p class="card-text"><strong>地點:</strong> {{ item.Country }} | {{ item.Location }}</p>
+                                <p class="card-text"><strong>日期:</strong> {{ item.Date }}</p>
+                                <p class="card-text"><strong>票價:</strong> {{ item.Price }}</p>
+                                <p class="card-text"><strong>座位:</strong> {{ item.Seat }}</p>
+                                <p class="card-text"><small class="text-muted">距離現在: {{ getTimeAgo(item.Date) }}</small></p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-        </section>
+            </div>
+        </div>
+
+        <nav aria-label="Page navigation" class="d-flex justify-content-center mb-4">
+            <ul class="pagination">
+                <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                    <a class="page-link" href="#" @click.prevent="currentPage--">上一頁</a>
+                </li>
+                <li class="page-item" v-for="page in totalPages" :key="page" :class="{ active: currentPage === page }">
+                    <a class="page-link" href="#" @click.prevent="currentPage = page">{{ page }}</a>
+                </li>
+                <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+                    <a class="page-link" href="#" @click.prevent="currentPage++">下一頁</a>
+                </li>
+            </ul>
+        </nav>
+
+        <button class="add-button" @click="showAddModal = true">
+            <i class="bi bi-plus-lg"></i>
+        </button>
+
+        <div class="modal fade" :class="{ 'show d-block': showAddModal }" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true" @click.self="showAddModal = false">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addModalLabel">新增演唱會紀錄</h5>
+                        <button type="button" class="btn-close" @click="showAddModal = false" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form @submit.prevent="addConcert">
+                            <div class="mb-3">
+                                <label for="concertName" class="form-label">演唱會名稱</label>
+                                <input type="text" class="form-control" id="concertName" v-model="newConcert.ConcertName" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="artist" class="form-label">表演藝人</label>
+                                <input type="text" class="form-control" id="artist" v-model="newConcert.Artist" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="country" class="form-label">舉辦國家</label>
+                                <input type="text" class="form-control" id="country" v-model="newConcert.Country" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="location" class="form-label">演唱會場地</label>
+                                <input type="text" class="form-control" id="location" v-model="newConcert.Location" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="date" class="form-label">演唱會日期</label>
+                                <input type="date" class="form-control" id="date" v-model="newConcert.Date" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="price" class="form-label">票價</label>
+                                <input type="text" class="form-control" id="price" v-model="newConcert.Price" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="seat" class="form-label">座位</label>
+                                <input type="text" class="form-control" id="seat" v-model="newConcert.Seat" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="imgUrl" class="form-label">圖片 URL</label>
+                                <input type="url" class="form-control" id="imgUrl" v-model="newConcert.ImgUrl">
+                            </div>
+                            <button type="submit" class="btn btn-primary">新增</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div v-if="showAddModal" class="modal-backdrop fade show"></div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
     <script>
-        // 將此替換為您部署的 Google Apps Script Web 應用程式 URL
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxAy0SBDS8oeFMRD5tFRQyLJMQweUFyGAoEjjYlmbGKbEVCHHGukMNznELGDUQPe-xZsQ/exec';
-        const concertsContainer = document.getElementById('concertsContainer');
-        const formMessage = document.getElementById('formMessage');
-        const loadingMessage = document.getElementById('loadingMessage');
+        const { createApp, ref, onMounted, computed } = Vue;
 
-        // 輔助函式：顯示訊息
-        function showMessage(element, message, type) {
-            element.textContent = message;
-            element.className = `message-area ${type}`;
-        }
-
-        // 輔助函式：創建演唱會卡片 HTML
-        function createConcertCard(record) {
-            const card = document.createElement('div');
-            card.className = 'concert-card';
-            const defaultImageUrl = 'https://via.placeholder.com/200x150?text=No+Image'; // 預設圖片
-
-            card.innerHTML = `
-                <div class="concert-card-image">
-                    <img src="${record ['Image URL'] || defaultImageUrl}" alt="${record['Concert Name'] || '演唱會圖片'}">
-                </div>
-                <div class="concert-card-content">
-                    <h3>${record['Concert Name'] || '未命名演唱會'}</h3>
-                    <p><strong>藝人:</strong> ${record['Artist'] || 'N/A'}</p>
-                    <p><strong>日期:</strong> ${record['Date'] ? new Date(record['Date']).toLocaleDateString() : 'N/A' }</p>
-                    <p><strong>地點:</strong> ${record['Location'] || 'N/A'}</p>
-                    <p><strong>座位:</strong> ${record['Seat'] || 'N/A'}</p>
-                    <p><strong>票價:</strong> ${record['Price'] || 'N/A'}</p>
-                    <p>${record['Notes'] || ''}</p>
-                </div>
-                <div class="ticket-style"></div>
-            `;
-            return card;
-        }
-
-        // 載入演唱會資料並渲染到頁面
-        async function loadConcerts() {
-            concertsContainer.innerHTML = ''; // 清空現有卡片
-            showMessage(loadingMessage, '載入中...', 'info');
-
-            try {
-                const response = await fetch(SCRIPT_URL, {
-                    method: 'GET',
-                    mode: 'cors'
+        createApp({
+            setup() {
+                const concertList = ref([]);
+                const showAddModal = ref(false);
+                const newConcert = ref({
+                    ConcertName: '',
+                    Artist: '',
+                    Country: '',
+                    Location: '',
+                    Date: '',
+                    Price: '',
+                    Seat: '',
+                    ImgUrl: ''
                 });
 
-                const result = await response.json();
+                const sortBy = ref('Date'); // 預設排序方式
+                const sortOrder = ref('desc'); // 預設排序順序 (日期倒序，最新在最前)
+                const currentPage = ref(1);
+                const itemsPerPage = 10; // 每頁顯示10筆資料
 
-                if (result.result === 'success') {
-                    if (result.data && result.data.length > 0) {
-                        result.data.forEach(record => {
-                            const card = createConcertCard(record);
-                            concertsContainer.appendChild(card);
-                        });
-                        loadingMessage.style.display = 'none'; // 隱藏載入訊息
-                    } else {
-                        showMessage(loadingMessage, '目前沒有演唱會紀錄，請新增！', 'info');
+                // **重要：將這裡替換為你的 Google Apps Script Web App URL**
+                const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwM0cZFqhqDWPgfxdL9F03w4QqgL9Ct4SIryg_-y9w36jr_YzAzUYivLr_SWrpdSlSDLg/exec';
+
+                // 從 Google Sheet 獲取資料
+                const fetchConcerts = async () => {
+                    try {
+                        const response = await fetch(GOOGLE_APPS_SCRIPT_URL);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        const data = await response.json();
+                        concertList.value = data;
+                        sortConcerts(); // 初始化時進行排序
+                    } catch (error) {
+                        console.error("Error fetching concert data:", error);
+                        alert("載入演唱會資料失敗，請檢查網路或後端設定。");
                     }
-                } else {
-                    showMessage(loadingMessage, '載入失敗: ' + result.message, 'error');
-                }
-            } catch (error) {
-                console.error('Error loading concerts:', error);
-                showMessage(loadingMessage, '載入演唱會時發生錯誤。請檢查網路或稍後再試。', 'error');
-            }
-        }
+                };
 
-        // 表單提交處理
-        document.getElementById('concertForm').addEventListener('submit', async function(event) {
-            event.preventDefault(); // 阻止表單預設提交行為
+                // 新增演唱會資料到 Google Sheet
+                const addConcert = async () => {
+                    try {
+                        const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(newConcert.value)
+                        });
 
-            showMessage(formMessage, '正在提交...', 'info');
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
 
-            const formData = {
-                concertName: document.getElementById('concertName').value,
-                artist: document.getElementById('artist').value,
-                date: document.getElementById('date').value,
-                location: document.getElementById('location').value,
-                imageUrl: document.getElementById('imageUrl').value,
-                notes: document.getElementById('notes').value
-            };
+                        const result = await response.json();
+                        if (result.success) {
+                            alert('演唱會資料新增成功！');
+                            showAddModal.value = false;
+                            // 清空表單
+                            newConcert.value = {
+                                ConcertName: '',
+                                Artist: '',
+                                Country: '',
+                                Location: '',
+                                Date: '',
+                                Price: '',
+                                Seat: '',
+                                ImgUrl: ''
+                            };
+                            fetchConcerts(); // 重新載入資料以顯示新增的內容
+                        } else {
+                            alert(`新增失敗: ${result.error}`);
+                        }
+                    } catch (error) {
+                        console.error("Error adding concert data:", error);
+                        alert("新增演唱會資料失敗，請檢查網路或後端設定。");
+                    }
+                };
 
-            try {
-                const response = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'cors',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(formData)
+                // 計算距離查詢日期已過多久
+                const getTimeAgo = (dateString) => {
+                    if (!dateString) return 'N/A';
+                    const concertDate = new Date(dateString);
+                    const now = new Date();
+                    const diffTime = Math.abs(now.getTime() - concertDate.getTime());
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // 毫秒轉天數
+
+                    if (now.getTime() < concertDate.getTime()) {
+                        return `還有 ${diffDays} 天`;
+                    } else if (diffDays === 0) {
+                        return `就在今天！`;
+                    } else {
+                        return `已過 ${diffDays} 天`;
+                    }
+                };
+
+                // 排序演唱會列表
+                const sortConcerts = () => {
+                    concertList.value.sort((a, b) => {
+                        let valA = a[sortBy.value];
+                        let valB = b[sortBy.value];
+
+                        // 對日期進行特殊處理 (將日期字串轉換為 Date 物件進行比較)
+                        if (sortBy.value === 'Date') {
+                            valA = new Date(valA);
+                            valB = new Date(valB);
+                        } else {
+                            // 其他類型轉換為字串後再比較，確保一致性
+                            valA = String(valA || '').toLowerCase();
+                            valB = String(valB || '').toLowerCase();
+                        }
+
+
+                        if (valA < valB) {
+                            return sortOrder.value === 'asc' ? -1 : 1;
+                        }
+                        if (valA > valB) {
+                            return sortOrder.value === 'asc' ? 1 : -1;
+                        }
+                        return 0;
+                    });
+                    currentPage.value = 1; // 排序後回到第一頁
+                };
+
+                // 分頁相關計算屬性
+                const totalPages = computed(() => Math.ceil(concertList.value.length / itemsPerPage));
+                const paginatedConcerts = computed(() => {
+                    const start = (currentPage.value - 1) * itemsPerPage;
+                    const end = start + itemsPerPage;
+                    return concertList.value.slice(start, end);
                 });
 
-                const result = await response.json();
+                // 組件掛載時獲取資料
+                onMounted(() => {
+                    fetchConcerts();
+                });
 
-                if (result.result === 'success') {
-                    showMessage(formMessage, '紀錄新增成功！', 'success');
-                    document.getElementById('concertForm').reset(); // 清空表單
-                    await loadConcerts(); // 重新載入並顯示最新資料
-                } else {
-                    showMessage(formMessage, '新增失敗: ' + result.message, 'error');
-                }
-            } catch (error) {
-                console.error('Error submitting form:', error);
-                showMessage(formMessage, '提交時發生錯誤。請檢查網路或稍後再試。', 'error');
+                return {
+                    concertList,
+                    showAddModal,
+                    newConcert,
+                    addConcert,
+                    getTimeAgo,
+                    sortBy,
+                    sortOrder,
+                    sortConcerts,
+                    currentPage,
+                    totalPages,
+                    paginatedConcerts
+                };
             }
-        });
-
-        // 頁面載入時自動載入現有紀錄
-        document.addEventListener('DOMContentLoaded', loadConcerts);
+        }).mount('#app');
     </script>
 </body>
 </html>
